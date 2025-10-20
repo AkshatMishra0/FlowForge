@@ -12,6 +12,7 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "turbo run clean",
     "db:generate": "cd apps/backend && npm run db:generate",
     "db:push": "cd apps/backend && npm run db:push",
