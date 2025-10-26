@@ -83,6 +83,9 @@ cp .env.example .env
 
 4. **Set up database**
 ```bash
+# Start PostgreSQL and Redis with Docker
+docker-compose up -d
+
 # Generate Prisma client
 npm run db:generate
 
