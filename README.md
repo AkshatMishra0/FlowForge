@@ -2,6 +2,8 @@
 
 **WhatsApp Automation + Smart Invoicing + Payment Reminder SaaS for Local Businesses**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 ## 🌟 Features
 
 - 📱 **WhatsApp Automation** - Send automated follow-ups and messages
