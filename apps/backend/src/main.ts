@@ -27,8 +27,8 @@ async function bootstrap() {
   // Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('FlowForge API')
-    .setDescription('WhatsApp Automation + Smart Invoicing + Payment Reminder SaaS API')
-    .setVersion('1.0')
+    .setDescription('WhatsApp Automation & Smart Invoicing API')
+    .setVersion('1.0.0')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
