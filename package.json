@@ -1,0 +1,30 @@
+{
+  "name": "flowforge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WhatsApp Automation + Smart Invoicing + Payment Reminder SaaS",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean",
+    "db:generate": "cd apps/backend && npm run db:generate",
+    "db:push": "cd apps/backend && npm run db:push",
+    "db:migrate": "cd apps/backend && npm run db:migrate",
+    "db:studio": "cd apps/backend && npm run db:studio"
+  },
+  "devDependencies": {
+    "turbo": "^1.11.2",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
