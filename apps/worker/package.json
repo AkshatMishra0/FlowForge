@@ -1,0 +1,26 @@
+{
+  "name": "@flowforge/worker",
+  "version": "1.0.0",
+  "description": "FlowForge Background Workers",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.8.0",
+    "bullmq": "^5.1.5",
+    "ioredis": "^5.3.2",
+    "axios": "^1.6.5",
+    "date-fns": "^3.0.6",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3",
+    "prisma": "^5.8.0"
+  }
+}
