@@ -1,0 +1,389 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & BUSINESS MODELS
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  name          String?
+  emailVerified DateTime?
+  image         String?
+  provider      String?   @default("email") // email, google
+  providerId    String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businesses Business[]
+  auditLogs  AuditLog[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Business {
+  id              String   @id @default(cuid())
+  name            String
+  address         String?
+  phone           String?
+  whatsappNumber  String?
+  email           String?
+  website         String?
+  timezone        String   @default("Asia/Kolkata")
+  currency        String   @default("INR")
+  
+  // API Keys & Integration Settings
+  whatsappPhoneNumberId String?
+  whatsappAccessToken   String?
+  whatsappBusinessId    String?
+  razorpayKeyId         String?
+  razorpayKeySecret     String?
+  googleCalendarId      String?
+  googleCalendarToken   String?
+  
+  // Billing
+  plan            String   @default("free") // free, starter, pro, enterprise
+  subscriptionId  String?
+  billingEmail    String?
+  
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leads              Lead[]
+  messageLogs        MessageLog[]
+  invoices           Invoice[]
+  bookings           Booking[]
+  bookingSlots       BookingSlot[]
+  followUpSequences  FollowUpSequence[]
+  scheduledJobs      ScheduledJob[]
+
+  @@index([ownerId])
+  @@map("businesses")
+}
+
+// ============================================
+// CRM MODELS
+// ============================================
+
+model Lead {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String
+  whatsapp    String?
+  company     String?
+  source      String?  // website, referral, campaign, manual
+  status      String   @default("new") // new, contacted, qualified, converted, lost
+  tags        String[] @default([])
+  notes       String?
+  
+  // Custom fields (JSON)
+  customFields Json?
+  
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messageLogs MessageLog[]
+  invoices    Invoice[]
+  bookings    Booking[]
+  activities  Activity[]
+
+  @@index([businessId])
+  @@index([status])
+  @@index([phone])
+  @@map("leads")
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String   // message, invoice, booking, note, status_change
+  title       String
+  description String?
+  metadata    Json?
+  
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+  @@index([createdAt])
+  @@map("activities")
+}
+
+// ============================================
+// WHATSAPP MODELS
+// ============================================
+
+model MessageLog {
+  id              String   @id @default(cuid())
+  whatsappId      String?  @unique
+  phone           String
+  direction       String   // inbound, outbound
+  type            String   // text, template, image, document
+  content         String
+  templateName    String?
+  status          String   @default("pending") // pending, sent, delivered, read, failed
+  errorMessage    String?
+  metadata        Json?
+  
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@index([leadId])
+  @@index([phone])
+  @@index([createdAt])
+  @@map("message_logs")
+}
+
+model FollowUpSequence {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  triggerType String   // manual, lead_created, invoice_sent, booking_confirmed
+  
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  steps FollowUpStep[]
+
+  @@index([businessId])
+  @@map("followup_sequences")
+}
+
+model FollowUpStep {
+  id          String   @id @default(cuid())
+  order       Int
+  delayHours  Int      // Delay from previous step or trigger
+  channel     String   @default("whatsapp") // whatsapp, email, sms
+  templateId  String?
+  message     String
+  
+  sequenceId String
+  sequence   FollowUpSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sequenceId])
+  @@map("followup_steps")
+}
+
+// ============================================
+// INVOICE & PAYMENT MODELS
+// ============================================
+
+model Invoice {
+  id              String   @id @default(cuid())
+  invoiceNumber   String   @unique
+  customerName    String
+  customerEmail   String?
+  customerPhone   String
+  customerAddress String?
+  
+  amount          Float
+  tax             Float    @default(0)
+  discount        Float    @default(0)
+  totalAmount     Float
+  
+  currency        String   @default("INR")
+  status          String   @default("draft") // draft, sent, opened, paid, overdue, cancelled
+  
+  dueDate         DateTime?
+  paidAt          DateTime?
+  
+  // Razorpay
+  razorpayPaymentLinkId String?
+  razorpayPaymentId     String?
+  razorpayOrderId       String?
+  
+  notes           String?
+  termsAndConditions String?
+  
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items            InvoiceItem[]
+  paymentReminders PaymentReminder[]
+
+  @@index([businessId])
+  @@index([leadId])
+  @@index([status])
+  @@index([invoiceNumber])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String @id @default(cuid())
+  description String
+  quantity    Float
+  unitPrice   Float
+  amount      Float
+  
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+model PaymentReminder {
+  id           String   @id @default(cuid())
+  reminderType String   // same_day, day_1, day_7, custom
+  scheduledFor DateTime
+  sentAt       DateTime?
+  status       String   @default("pending") // pending, sent, failed
+  
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([scheduledFor])
+  @@index([status])
+  @@map("payment_reminders")
+}
+
+// ============================================
+// BOOKING MODELS
+// ============================================
+
+model BookingSlot {
+  id          String   @id @default(cuid())
+  dayOfWeek   Int      // 0 = Sunday, 6 = Saturday
+  startTime   String   // HH:mm format
+  endTime     String   // HH:mm format
+  duration    Int      // Minutes
+  capacity    Int      @default(1)
+  active      Boolean  @default(true)
+  
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@map("booking_slots")
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  customerName    String
+  customerEmail   String?
+  customerPhone   String
+  bookingDate     DateTime
+  startTime       String
+  endTime         String
+  duration        Int      // Minutes
+  
+  status          String   @default("pending") // pending, confirmed, cancelled, completed, no_show
+  notes           String?
+  
+  // Google Calendar
+  googleEventId   String?
+  
+  // Confirmation
+  confirmedAt     DateTime?
+  cancelledAt     DateTime?
+  cancellationReason String?
+  
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@index([leadId])
+  @@index([bookingDate])
+  @@index([status])
+  @@map("bookings")
+}
+
+// ============================================
+// BACKGROUND JOB MODELS
+// ============================================
+
+model ScheduledJob {
+  id          String   @id @default(cuid())
+  jobType     String   // followup, payment_reminder, booking_reminder
+  jobData     Json
+  scheduledFor DateTime
+  executedAt  DateTime?
+  status      String   @default("pending") // pending, processing, completed, failed
+  attempts    Int      @default(0)
+  lastError   String?
+  
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@index([scheduledFor])
+  @@index([status])
+  @@map("scheduled_jobs")
+}
+
+// ============================================
+// AUDIT LOG MODEL
+// ============================================
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String   // create, update, delete, login, logout
+  entityType  String   // user, lead, invoice, booking
+  entityId    String
+  changes     Json?
+  ipAddress   String?
+  userAgent   String?
+  
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
