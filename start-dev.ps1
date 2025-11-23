@@ -14,7 +14,7 @@ Write-Host "- Install Redis: https://redis.io/download/" -ForegroundColor White
 Write-Host "- Or use Docker: docker-compose up -d" -ForegroundColor White
 Write-Host ""
 
-$continue = Read-Host "Continue? (Y/n)"
+$continue = Read-Host "Continue? (Y/n)" 
 if ($continue -eq "n") {
     exit
 }
