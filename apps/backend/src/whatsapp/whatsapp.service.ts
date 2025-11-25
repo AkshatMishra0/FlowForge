@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WhatsappClient } from './whatsapp.client';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -16,7 +16,7 @@ export class WhatsappService {
     });
 
     if (!business) {
-      throw new Error('Business not found');
+      throw new NotFoundException('Business not found');
     }
 
     // Send message via WhatsApp API
