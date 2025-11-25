@@ -3,6 +3,8 @@
 **WhatsApp Automation + Smart Invoicing + Payment Reminder SaaS for Local Businesses**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub Stars](https://img.shields.io/github/stars/AkshatMishra0/FlowForge?style=social)](https://github.com/AkshatMishra0/FlowForge)
+[![CI](https://github.com/AkshatMishra0/FlowForge/workflows/CI/badge.svg)](https://github.com/AkshatMishra0/FlowForge/actions)
 
 ## 🌟 Features
 
