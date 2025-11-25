@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RazorpayClient } from './razorpay.client';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
@@ -6,6 +6,8 @@ import { CreateInvoiceDto, UpdateInvoiceStatusDto } from './dto/invoice.dto';
 
 @Injectable()
 export class InvoiceService {
+  private readonly logger = new Logger(InvoiceService.name);
+
   constructor(
     private prisma: PrismaService,
     private razorpayClient: RazorpayClient,
