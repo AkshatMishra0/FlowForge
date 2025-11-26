@@ -8,6 +8,13 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'FlowForge - WhatsApp Automation & Invoicing',
   description: 'WhatsApp Automation + Smart Invoicing + Payment Reminder SaaS for Local Businesses',
+  keywords: ['WhatsApp automation', 'invoicing', 'payment reminders', 'CRM', 'booking system'],
+  authors: [{ name: 'FlowForge Team' }],
+  openGraph: {
+    title: 'FlowForge - WhatsApp Automation & Invoicing',
+    description: 'WhatsApp Automation + Smart Invoicing + Payment Reminder SaaS for Local Businesses',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
