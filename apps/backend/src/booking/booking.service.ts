@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { CreateBookingDto, UpdateBookingDto } from './dto/booking.dto';
@@ -11,6 +11,11 @@ export class BookingService {
   ) {}
 
   async createBooking(businessId: string, dto: CreateBookingDto) {
+    // Validate booking time is in the future
+    if (new Date(dto.bookingTime) < new Date()) {
+      throw new BadRequestException('Booking time must be in the future');
+    }
+
     const booking = await this.prisma.booking.create({
       data: {
         ...dto,
