@@ -113,6 +113,23 @@ Access the application:
 
 ```bash
 npm run build
+npm start
+```
+
+### Production Deployment with PM2
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start all services
+pm2 start ecosystem.config.js
+
+# Monitor services
+pm2 monit
+
+# View logs
+pm2 logs
 ```
 
 ## 📦 Deployment
