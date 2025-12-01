@@ -2,7 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RazorpayClient } from './razorpay.client';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
+import { SchedulerService } from '../scheduler/scheduler.service';
 import { CreateInvoiceDto, UpdateInvoiceStatusDto } from './dto/invoice.dto';
+import { addDays } from 'date-fns';
 
 @Injectable()
 export class InvoiceService {
@@ -11,7 +13,8 @@ export class InvoiceService {
   constructor(
     private prisma: PrismaService,
     private razorpayClient: RazorpayClient,
-    private whatsappService: WhatsappService
+    private whatsappService: WhatsappService,
+    private schedulerService: SchedulerService,
   ) {}
 
   async createInvoice(businessId: string, dto: CreateInvoiceDto) {
@@ -60,6 +63,11 @@ export class InvoiceService {
       await this.sendInvoiceWhatsApp(invoice.id);
     }
 
+    // Schedule payment reminders if due date is set
+    if (dto.dueDate) {
+      await this.schedulePaymentReminders(invoice.id, new Date(dto.dueDate));
+    }
+
     // Create activity
     if (dto.leadId) {
       await this.prisma.activity.create({
@@ -74,6 +82,29 @@ export class InvoiceService {
     }
 
     return invoice;
+  }
+
+  private async schedulePaymentReminders(invoiceId: string, dueDate: Date) {
+    // Same day reminder (on due date at 9 AM)
+    const sameDayTime = new Date(dueDate);
+    sameDayTime.setHours(9, 0, 0, 0);
+    if (sameDayTime > new Date()) {
+      await this.schedulerService.schedulePaymentReminder(invoiceId, 'same_day', sameDayTime);
+    }
+
+    // Day 1 after due date
+    const day1Time = addDays(dueDate, 1);
+    day1Time.setHours(9, 0, 0, 0);
+    if (day1Time > new Date()) {
+      await this.schedulerService.schedulePaymentReminder(invoiceId, 'day_1', day1Time);
+    }
+
+    // Day 7 after due date
+    const day7Time = addDays(dueDate, 7);
+    day7Time.setHours(9, 0, 0, 0);
+    if (day7Time > new Date()) {
+      await this.schedulerService.schedulePaymentReminder(invoiceId, 'day_7', day7Time);
+    }
   }
 
   async createPaymentLink(invoiceId: string) {

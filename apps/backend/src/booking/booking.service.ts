@@ -1,13 +1,17 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
+import { SchedulerService } from '../scheduler/scheduler.service';
+import { GoogleCalendarService } from './google-calendar.service';
 import { CreateBookingDto, UpdateBookingDto } from './dto/booking.dto';
 
 @Injectable()
 export class BookingService {
   constructor(
     private prisma: PrismaService,
-    private whatsappService: WhatsappService
+    private whatsappService: WhatsappService,
+    private schedulerService: SchedulerService,
+    private googleCalendarService: GoogleCalendarService,
   ) {}
 
   async createBooking(businessId: string, dto: CreateBookingDto) {
@@ -46,6 +50,12 @@ ${business.name}`;
         leadId: dto.leadId,
       });
     }
+
+    // Schedule booking reminder (1 day before)
+    await this.schedulerService.scheduleBookingReminder(booking.id);
+
+    // Create Google Calendar event
+    await this.googleCalendarService.createEvent(booking, businessId);
 
     return booking;
   }
