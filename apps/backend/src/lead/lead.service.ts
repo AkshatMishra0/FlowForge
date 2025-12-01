@@ -28,9 +28,6 @@ export class LeadService {
         businessId,
         ...filters,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
       include: {
         _count: {
           select: {

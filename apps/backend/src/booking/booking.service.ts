@@ -12,7 +12,7 @@ export class BookingService {
 
   async createBooking(businessId: string, dto: CreateBookingDto) {
     // Validate booking time is in the future
-    if (new Date(dto.bookingTime) < new Date()) {
+    if (new Date(dto.bookingDate) < new Date()) {
       throw new BadRequestException('Booking time must be in the future');
     }
 
