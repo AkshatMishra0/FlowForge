@@ -6,7 +6,7 @@
 Local: http://localhost:4000/api
 Production: https://your-domain.com/api
 ```
-
+ 
 ## Authentication
 
 All protected endpoints require JWT token in Authorization header:
