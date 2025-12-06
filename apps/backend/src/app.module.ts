@@ -10,6 +10,8 @@ import { LeadModule } from './lead/lead.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { BusinessModule } from './business/business.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
       },
     ]),
     PrismaModule,
+    CacheModule,
     AuthModule,
     BusinessModule,
     WhatsappModule,
@@ -31,6 +34,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     LeadModule,
     DashboardModule,
     SchedulerModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}
