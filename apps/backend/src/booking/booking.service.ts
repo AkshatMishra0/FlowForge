@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { SchedulerService } from '../scheduler/scheduler.service';
@@ -16,8 +16,31 @@ export class BookingService {
 
   async createBooking(businessId: string, dto: CreateBookingDto) {
     // Validate booking time is in the future
-    if (new Date(dto.bookingDate) < new Date()) {
+    const bookingDate = new Date(dto.bookingDate);
+    const now = new Date();
+    
+    if (bookingDate < now) {
       throw new BadRequestException('Booking time must be in the future');
+    }
+
+    // Validate booking date is not too far in advance (e.g., 6 months)
+    const maxAdvanceDate = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000);
+    if (bookingDate > maxAdvanceDate) {
+      throw new BadRequestException('Booking date cannot be more than 6 months in advance');
+    }
+
+    // Check for conflicting bookings
+    const conflictingBooking = await this.checkBookingConflict(
+      businessId,
+      dto.bookingDate,
+      dto.startTime,
+      dto.endTime,
+    );
+
+    if (conflictingBooking) {
+      throw new BadRequestException(
+        'This time slot is already booked. Please choose a different time.',
+      );
     }
 
     const booking = await this.prisma.booking.create({
@@ -112,6 +135,54 @@ ${business.name}`;
       return slot.dayOfWeek === dayOfWeek &&
         !bookings.some((booking: any) => booking.startTime === slot.startTime);
     });
+  }
+
+  /**
+   * Check if there's a conflicting booking for the given time slot
+   */
+  private async checkBookingConflict(
+    businessId: string,
+    bookingDate: Date,
+    startTime: string,
+    endTime: string,
+  ): Promise<boolean> {
+    const existingBookings = await this.prisma.booking.findMany({
+      where: {
+        businessId,
+        bookingDate,
+        status: { in: ['pending', 'confirmed'] },
+        OR: [
+          {
+            AND: [
+              { startTime: { lte: startTime } },
+              { endTime: { gt: startTime } },
+            ],
+          },
+          {
+            AND: [
+              { startTime: { lt: endTime } },
+              { endTime: { gte: endTime } },
+            ],
+          },
+          {
+            AND: [
+              { startTime: { gte: startTime } },
+              { endTime: { lte: endTime } },
+            ],
+          },
+        ],
+      },
+    });
+
+    return existingBookings.length > 0;
+  }
+
+  /**
+   * Validate booking time format (HH:MM)
+   */
+  private validateTimeFormat(time: string): boolean {
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timeRegex.test(time);
   }
 }
 
