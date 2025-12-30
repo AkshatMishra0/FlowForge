@@ -51,6 +51,24 @@ export class CacheService {
     }
   }
 
+  /**
+   * Get multiple keys at once (batch operation)
+   */
+  async mGet<T>(keys: string[]): Promise<(T | null)[]> {
+    if (!this.isConnected || keys.length === 0) {
+      this.logger.warn('Redis not connected or empty keys array');
+      return keys.map(() => null);
+    }
+
+    try {
+      const values = await this.client.mGet(keys);
+      return values.map((value) => (value ? JSON.parse(value) : null));
+    } catch (error) {
+      this.logger.error('Error getting multiple cache keys', error);
+      return keys.map(() => null);
+    }
+  }
+
   async set(key: string, value: any, ttlSeconds: number = 3600): Promise<void> {
     if (!this.isConnected) {
       this.logger.warn('Redis not connected, skipping cache set');
@@ -62,6 +80,49 @@ export class CacheService {
     } catch (error) {
       this.logger.error(`Error setting cache key ${key}`, error);
     }
+  }
+
+  /**
+   * Set multiple keys at once (batch operation)
+   */
+  async mSet(entries: Array<{ key: string; value: any; ttl?: number }>): Promise<void> {
+    if (!this.isConnected || entries.length === 0) {
+      this.logger.warn('Redis not connected or empty entries array');
+      return;
+    }
+
+    try {
+      // Use pipeline for efficient batch operations
+      const pipeline = this.client.multi();
+      
+      for (const entry of entries) {
+        const ttl = entry.ttl || 3600;
+        pipeline.setEx(entry.key, ttl, JSON.stringify(entry.value));
+      }
+      
+      await pipeline.exec();
+    } catch (error) {
+      this.logger.error('Error setting multiple cache keys', error);
+    }
+  }
+
+  /**
+   * Get value from cache or compute and set it if not exists
+   */
+  async getOrSet<T>(
+    key: string,
+    factory: () => Promise<T>,
+    ttlSeconds: number = 3600,
+  ): Promise<T> {
+    const cached = await this.get<T>(key);
+    
+    if (cached !== null) {
+      return cached;
+    }
+
+    const value = await factory();
+    await this.set(key, value, ttlSeconds);
+    return value;
   }
 
   async del(key: string): Promise<void> {
@@ -127,6 +188,50 @@ export class CacheService {
       await this.client.expire(key, ttlSeconds);
     } catch (error) {
       this.logger.error(`Error setting expiry for cache key ${key}`, error);
+    }
+  }
+
+  /**
+   * Get remaining TTL for a key in seconds
+   */
+  async getTTL(key: string): Promise<number> {
+    if (!this.isConnected) {
+      return -2;
+    }
+
+    try {
+      return await this.client.ttl(key);
+    } catch (error) {
+      this.logger.error(`Error getting TTL for cache key ${key}`, error);
+      return -2;
+    }
+  }
+
+  /**
+   * Get cache statistics
+   */
+  async getStats(): Promise<{
+    connected: boolean;
+    keysCount?: number;
+    memoryUsed?: string;
+  }> {
+    if (!this.isConnected) {
+      return { connected: false };
+    }
+
+    try {
+      const dbSize = await this.client.dbSize();
+      const info = await this.client.info('memory');
+      const memoryMatch = info.match(/used_memory_human:(.+)/);
+      
+      return {
+        connected: true,
+        keysCount: dbSize,
+        memoryUsed: memoryMatch ? memoryMatch[1].trim() : 'unknown',
+      };
+    } catch (error) {
+      this.logger.error('Error getting cache stats', error);
+      return { connected: true };
     }
   }
 
