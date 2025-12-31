@@ -40,14 +40,19 @@ export class ExternalApiError extends AppError {
   }
 }
 
-// Added custom error classes - Modified: 2025-12-25 20:07:26
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
+export class ConflictError extends AppError {
+  constructor(message: string, details?: any) {
+    super('CONFLICT', message, 409, details);
+    this.name = 'ConflictError';
+  }
+}
+
+export class RateLimitError extends AppError {
+  constructor(message: string = 'Rate limit exceeded') {
+    super('RATE_LIMIT', message, 429);
+    this.name = 'RateLimitError';
+  }
+}
 // Change line 7 for this commit
 // Change line 8 for this commit
 // Change line 9 for this commit

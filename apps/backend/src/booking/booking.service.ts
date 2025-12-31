@@ -19,14 +19,28 @@ export class BookingService {
     const bookingDate = new Date(dto.bookingDate);
     const now = new Date();
     
-    if (bookingDate < now) {
-      throw new BadRequestException('Booking time must be in the future');
+    // Set time to start of day for date comparison
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const bookingDay = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), bookingDate.getDate());
+    
+    if (bookingDay < today) {
+      throw new BadRequestException('Booking date must be today or in the future');
     }
 
     // Validate booking date is not too far in advance (e.g., 6 months)
     const maxAdvanceDate = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000);
     if (bookingDate > maxAdvanceDate) {
       throw new BadRequestException('Booking date cannot be more than 6 months in advance');
+    }
+    
+    // Validate time format
+    if (!this.isValidTimeFormat(dto.startTime) || !this.isValidTimeFormat(dto.endTime)) {
+      throw new BadRequestException('Invalid time format. Use HH:MM format');
+    }
+    
+    // Validate end time is after start time
+    if (!this.isEndTimeAfterStartTime(dto.startTime, dto.endTime)) {
+      throw new BadRequestException('End time must be after start time');
     }
 
     // Check for conflicting bookings
@@ -180,38 +194,24 @@ ${business.name}`;
   /**
    * Validate booking time format (HH:MM)
    */
-  private validateTimeFormat(time: string): boolean {
+  private isValidTimeFormat(time: string): boolean {
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     return timeRegex.test(time);
   }
+
+  /**
+   * Check if end time is after start time
+   */
+  private isEndTimeAfterStartTime(startTime: string, endTime: string): boolean {
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    
+    if (endHour > startHour) return true;
+    if (endHour === startHour && endMinute > startMinute) return true;
+    
+    return false;
+  }
 }
-
-// Integrated Google Calendar sync - Modified: 2025-12-25 20:07:29
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-// Change line 16 for this commit
-// Change line 17 for this commit
-// Change line 18 for this commit
-// Change line 19 for this commit
-
-// Resolved calendar sync issues - Modified: 2025-12-25 20:07:38
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
 // Change line 3 for this commit
 // Change line 4 for this commit
 // Change line 5 for this commit
