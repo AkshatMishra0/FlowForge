@@ -77,6 +77,7 @@ export class CacheService {
 
     try {
       await this.client.setEx(key, ttlSeconds, JSON.stringify(value));
+      this.logger.debug(`Cache set: ${key} (TTL: ${ttlSeconds}s)`);
     } catch (error) {
       this.logger.error(`Error setting cache key ${key}`, error);
     }

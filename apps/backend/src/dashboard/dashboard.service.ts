@@ -69,43 +69,42 @@ export class DashboardService {
       }),
     ]);
 
-    return { leads, invoices, bookings, messages };
+    return { 
+      leads, 
+      invoices, 
+      bookings, 
+      messages,
+      metadata: {
+        fetchedAt: new Date(),
+        businessId,
+      }
+    };
+  }
+
+  async getPerformanceMetrics(businessId: string, days: number = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const [newLeads, convertedLeads, totalBookings] = await Promise.all([
+      this.prisma.lead.count({
+        where: { businessId, createdAt: { gte: startDate } },
+      }),
+      this.prisma.lead.count({
+        where: { businessId, status: 'converted', createdAt: { gte: startDate } },
+      }),
+      this.prisma.booking.count({
+        where: { businessId, createdAt: { gte: startDate } },
+      }),
+    ]);
+
+    const conversionRate = newLeads > 0 ? (convertedLeads / newLeads) * 100 : 0;
+
+    return {
+      period: `${days} days`,
+      newLeads,
+      convertedLeads,
+      conversionRate: parseFloat(conversionRate.toFixed(2)),
+      totalBookings,
+    };
   }
 }
-
-// Optimized dashboard queries - Modified: 2025-12-25 20:07:30
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-
-// Added real-time metrics - Modified: 2025-12-25 20:07:42
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-// Change line 16 for this commit
