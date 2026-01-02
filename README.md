@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Stars](https://img.shields.io/github/stars/AkshatMishra0/FlowForge?style=social)](https://github.com/AkshatMishra0/FlowForge)
 [![CI](https://github.com/AkshatMishra0/FlowForge/workflows/CI/badge.svg)](https://github.com/AkshatMishra0/FlowForge/actions)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/AkshatMishra0/FlowForge/pulls)
 
 ## 🌟 Features
 

@@ -9,8 +9,8 @@ export class HealthController {
 
   @Get()
   @ApiOperation({ 
-    summary: 'Health check',
-    description: 'Check if the API is running and responsive'
+    summary: 'Basic health check',
+    description: 'Check if the API is running and responsive. Returns basic health metrics.'
   })
   @ApiResponse({ 
     status: 200, 
@@ -19,7 +19,8 @@ export class HealthController {
       example: {
         status: 'ok',
         timestamp: '2026-01-04T11:30:00.000Z',
-        uptime: 3600.5
+        uptime: 3600.5,
+        version: '1.0.0'
       }
     }
   })

@@ -13,6 +13,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { CacheModule } from './cache/cache.module';
 import { HealthModule } from './health/health.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -37,9 +38,7 @@ import { HealthModule } from './health/health.module';
     DashboardModule,
     SchedulerModule,
     AnalyticsModule,
+    AiModule,
   ],
 })
 export class AppModule {}
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit

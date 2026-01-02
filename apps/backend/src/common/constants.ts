@@ -114,19 +114,13 @@ export const FILE_UPLOAD = {
   UPLOAD_PATH: './uploads',
 } as const;
 
-// Added application constants - Modified: 2025-12-25 20:07:25
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
+export const AI_FEATURES = {
+  GPT_5_1_CODEX_MAX: {
+    ENABLED: true,
+    MODEL_VERSION: '5.1-codex-max',
+    MAX_TOKENS: 8192,
+    TEMPERATURE: 0.7,
+    FEATURES: ['code-generation', 'code-review', 'auto-completion', 'refactoring'],
+  },
+  ENABLE_FOR_ALL_CLIENTS: true,
+} as const;
