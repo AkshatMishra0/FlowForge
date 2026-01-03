@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { SchedulerService } from '../scheduler/scheduler.service';
@@ -7,6 +7,8 @@ import { CreateBookingDto, UpdateBookingDto } from './dto/booking.dto';
 
 @Injectable()
 export class BookingService {
+  private readonly logger = new Logger(BookingService.name);
+
   constructor(
     private prisma: PrismaService,
     private whatsappService: WhatsappService,
@@ -15,6 +17,8 @@ export class BookingService {
   ) {}
 
   async createBooking(businessId: string, dto: CreateBookingDto) {
+    this.logger.log(`Creating booking for business ${businessId}`);
+    
     // Validate booking time is in the future
     const bookingDate = new Date(dto.bookingDate);
     const now = new Date();
@@ -24,6 +28,7 @@ export class BookingService {
     const bookingDay = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), bookingDate.getDate());
     
     if (bookingDay < today) {
+      this.logger.warn(`Booking rejected: Date ${dto.bookingDate} is in the past`);
       throw new BadRequestException('Booking date must be today or in the future');
     }
 

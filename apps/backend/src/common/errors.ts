@@ -53,12 +53,18 @@ export class RateLimitError extends AppError {
     this.name = 'RateLimitError';
   }
 }
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
+
+export class DatabaseError extends AppError {
+  constructor(message: string, details?: any) {
+    super('DB_ERROR', message, 500, details);
+    this.name = 'DatabaseError';
+  }
+}
+
+export class BusinessLogicError extends AppError {
+  constructor(message: string, code: string = 'BUSINESS_ERROR', details?: any) {
+    super(code, message, 422, details);
+    this.name = 'BusinessLogicError';
+  }
+}
+
