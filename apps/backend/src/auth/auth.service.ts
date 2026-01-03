@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -6,18 +6,23 @@ import { SignUpDto, SignInDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService
   ) {}
 
   async signUp(dto: SignUpDto) {
+    this.logger.log(`Attempting user registration for email: ${dto.email}`);
+    
     // Check if user exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
     if (existingUser) {
+      this.logger.warn(`Registration failed: User already exists with email ${dto.email}`);
       throw new ConflictException('User already exists');
     }
 
@@ -42,6 +47,8 @@ export class AuthService {
     // Generate token
     const token = this.generateToken(user.id, user.email);
 
+    this.logger.log(`User registered successfully: ${user.email}`);
+
     return {
       user,
       token,
@@ -49,12 +56,15 @@ export class AuthService {
   }
 
   async signIn(dto: SignInDto) {
+    this.logger.log(`Sign-in attempt for email: ${dto.email}`);
+    
     // Find user
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
     if (!user || !user.password) {
+      this.logger.warn(`Sign-in failed: Invalid credentials for ${dto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -62,11 +72,14 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
 
     if (!isPasswordValid) {
+      this.logger.warn(`Sign-in failed: Invalid password for ${dto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Generate token
     const token = this.generateToken(user.id, user.email);
+
+    this.logger.log(`User signed in successfully: ${user.email}`);
 
     return {
       user: {
