@@ -29,19 +29,27 @@ export class CustomerService {
   ) {}
 
   async findAll(businessId: string) {
+    if (!businessId) {
+      this.logger.error('BusinessId is required for findAll operation');
+      throw new Error('BusinessId is required');
+    }
+
     const cacheKey = `customers:${businessId}`;
     const cached = await this.cache.get<any[]>(cacheKey);
     
     if (cached) {
+      this.logger.debug(`Cache hit for customers:${businessId}`);
       return cached;
     }
 
+    this.logger.log(`Fetching customers for business: ${businessId}`);
     const customers = await this.prisma.customer.findMany({
       where: { businessId },
       orderBy: { createdAt: 'desc' },
     });
 
     await this.cache.set(cacheKey, customers, CACHE_TTL.MEDIUM);
+    this.logger.debug(`Cached ${customers.length} customers for business ${businessId}`);
     return customers;
   }
 
