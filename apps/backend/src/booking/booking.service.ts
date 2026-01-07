@@ -17,8 +17,14 @@ export class BookingService {
   ) {}
 
   async createBooking(businessId: string, dto: CreateBookingDto) {
-    this.logger.log(`Creating booking for business ${businessId}`);
+    this.logger.log(`Creating booking for business ${businessId} - Customer: ${dto.customerName}`);
     
+    // Validate inputs
+    if (!dto.customerPhone || dto.customerPhone.length < 10) {
+      this.logger.warn(`Invalid phone number provided: ${dto.customerPhone}`);
+      throw new BadRequestException('Valid customer phone number is required');
+    }
+
     // Validate booking time is in the future
     const bookingDate = new Date(dto.bookingDate);
     const now = new Date();
@@ -35,16 +41,19 @@ export class BookingService {
     // Validate booking date is not too far in advance (e.g., 6 months)
     const maxAdvanceDate = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000);
     if (bookingDate > maxAdvanceDate) {
+      this.logger.warn(`Booking rejected: Date too far in advance`);
       throw new BadRequestException('Booking date cannot be more than 6 months in advance');
     }
     
     // Validate time format
     if (!this.isValidTimeFormat(dto.startTime) || !this.isValidTimeFormat(dto.endTime)) {
+      this.logger.error(`Invalid time format - Start: ${dto.startTime}, End: ${dto.endTime}`);
       throw new BadRequestException('Invalid time format. Use HH:MM format');
     }
     
     // Validate end time is after start time
     if (!this.isEndTimeAfterStartTime(dto.startTime, dto.endTime)) {
+      this.logger.warn(`End time before start time - Start: ${dto.startTime}, End: ${dto.endTime}`);
       throw new BadRequestException('End time must be after start time');
     }
 
