@@ -21,6 +21,7 @@ export class HealthService {
   }
 
   async detailedCheck() {
+    const startTime = Date.now();
     const services = {
       database: await this.checkDatabase(),
       redis: await this.checkRedis(),
@@ -29,12 +30,18 @@ export class HealthService {
     };
 
     const allHealthy = Object.values(services).every((s) => s.status === 'ok');
+    const totalResponseTime = Date.now() - startTime;
 
     return {
       status: allHealthy ? 'ok' : 'degraded',
       timestamp: new Date().toISOString(),
       uptime: (Date.now() - this.startTime) / 1000,
+      totalCheckDuration: totalResponseTime,
       services,
+      memory: {
+        used: process.memoryUsage().heapUsed / 1024 / 1024,
+        total: process.memoryUsage().heapTotal / 1024 / 1024,
+      },
     };
   }
 
