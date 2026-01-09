@@ -46,6 +46,9 @@ export class AnalyticsService {
     startDate?: Date,
     endDate?: Date,
   ): Promise<AnalyticsMetrics> {
+    const startTime = Date.now();
+    this.logger.log(`Fetching analytics for business: ${businessId}`);
+    
     const dateFilter = this.buildDateFilter(startDate, endDate);
 
     try {
@@ -58,6 +61,9 @@ export class AnalyticsService {
           this.getMessageMetrics(businessId, dateFilter),
         ]);
 
+      const duration = Date.now() - startTime;
+      this.logger.log(`Analytics computed in ${duration}ms for business ${businessId}`);
+
       return {
         leadConversion: leadMetrics,
         revenueMetrics,
@@ -66,7 +72,7 @@ export class AnalyticsService {
         messageMetrics,
       };
     } catch (error) {
-      this.logger.error('Failed to fetch analytics', error);
+      this.logger.error(`Failed to fetch analytics for business ${businessId}`, error);
       throw error;
     }
   }
