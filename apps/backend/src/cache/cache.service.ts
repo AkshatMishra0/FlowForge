@@ -76,11 +76,35 @@ export class CacheService {
     }
 
     try {
-      await this.client.setEx(key, ttlSeconds, JSON.stringify(value));
+      await this.retryOperation(async () => {
+        await this.client.setEx(key, ttlSeconds, JSON.stringify(value));
+      });
       this.logger.debug(`Cache set: ${key} (TTL: ${ttlSeconds}s)`);
     } catch (error) {
       this.logger.error(`Error setting cache key ${key}`, error);
     }
+  }
+
+  private async retryOperation<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+  ): Promise<T> {
+    let lastError: Error;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        this.logger.warn(`Cache operation failed (attempt ${attempt}/${maxRetries})`);
+        
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, attempt * 100));
+        }
+      }
+    }
+    
+    throw lastError;
   }
 
   /**
