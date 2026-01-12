@@ -37,9 +37,18 @@ async function bootstrap() {
   // Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('FlowForge API')
-    .setDescription('WhatsApp Automation & Smart Invoicing API')
+    .setDescription('WhatsApp Automation & Smart Invoicing API - Comprehensive business management solution')
     .setVersion('1.0.0')
     .addBearerAuth()
+    .addTag('Authentication', 'User authentication and authorization')
+    .addTag('Business', 'Business profile management')
+    .addTag('Customers', 'Customer relationship management')
+    .addTag('Leads', 'Lead tracking and conversion')
+    .addTag('Bookings', 'Appointment and booking management')
+    .addTag('Invoices', 'Invoice generation and payment tracking')
+    .addTag('Analytics', 'Business analytics and insights')
+    .addTag('WhatsApp', 'WhatsApp messaging integration')
+    .addTag('Health', 'Service health and monitoring')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
