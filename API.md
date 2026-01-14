@@ -9,7 +9,7 @@ Production: https://your-domain.com/api
  
 ## Authentication
 
-All protected endpoints require JWT token in Authorization header:
+All protected endpoints require JWT token in Authorization header :
 
 ```
 Authorization: Bearer <token>
