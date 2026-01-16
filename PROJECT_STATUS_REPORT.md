@@ -28,7 +28,7 @@ flowforge/
 │   ├── web/             # Next.js Frontend (Port 3000)
 │   └── worker/          # BullMQ Background Jobs
 ├── packages/
-│   ├── database/        # Shared Prisma schema
+│   ├── database/        # Shared Prisma 
 │   ├── types/           # TypeScript types
 │   └── config/          # Shared configuration
 └── turbo.json
