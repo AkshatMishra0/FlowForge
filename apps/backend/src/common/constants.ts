@@ -6,9 +6,10 @@ export const API_RATE_LIMITS = {
   // Razorpay API rate limits
   RAZORPAY_REQUESTS_PER_SECOND: 10,
   
-  // Internal API rate limits
+  // Internal API rate limits (per user/IP)
   API_REQUESTS_PER_MINUTE: 100,
   API_REQUESTS_PER_HOUR: 1000,
+  API_REQUESTS_PER_DAY: 10000,
 };
 
 export const CACHE_TTL = {
