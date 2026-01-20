@@ -1,6 +1,17 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+interface ErrorResponse {
+  statusCode: number;
+  timestamp: string;
+  path: string;
+  method: string;
+  message: string | string[];
+  errors?: any;
+  requestId?: string;
+  correlationId?: string;
+}
+
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(GlobalExceptionFilter.name);
@@ -11,7 +22,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
+    let message: string | string[] = 'Internal server error';
     let errors: any = null;
 
     if (exception instanceof HttpException) {
@@ -26,38 +37,41 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
     } else if (exception instanceof Error) {
       message = exception.message;
+      // Log full stack trace for unexpected errors
+      this.logger.error(
+        `Unexpected error: ${exception.message}`,
+        exception.stack,
+      );
     }
 
+    // Generate request ID for tracking
+    const requestId = request.headers['x-request-id'] as string || this.generateRequestId();
+    const correlationId = request.headers['x-correlation-id'] as string;
+
+    // Enhanced logging with context
     this.logger.error(
-      `${request.method} ${request.url} - Status: ${status} - Message: ${message}`,
+      `[${requestId}] ${request.method} ${request.url} - Status: ${status} - Message: ${message}`,
       exception instanceof Error ? exception.stack : undefined,
     );
 
-    response.status(status).json({
+    const errorResponse: ErrorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
       message,
+      requestId,
+      ...(correlationId && { correlationId }),
       ...(errors && { errors }),
-    });
+    };
+
+    response.status(status).json(errorResponse);
+  }
+
+  private generateRequestId(): string {
+    return `req_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 }
-
-// Added global exception handling - Modified: 2025-12-25 20:07:20
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
 // Change line 13 for this commit
 // Change line 14 for this commit
 // Change line 15 for this commit
