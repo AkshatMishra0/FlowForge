@@ -1,52 +1,40 @@
-import { IsString, IsEmail, IsOptional, IsPhoneNumber, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsPhoneNumber, MinLength, MaxLength, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCustomerDto {
-  @IsString()
-  @MinLength(2)
-  @MaxLength(100)
+  @ApiProperty({ example: 'John Doe', description: 'Customer full name' })
+  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @MinLength(2, { message: 'Name must be at least 2 characters long' })
+  @MaxLength(100, { message: 'Name must not exceed 100 characters' })
   name: string;
 
-  @IsPhoneNumber('IN')
+  @ApiProperty({ example: '+919876543210', description: 'Customer phone number (Indian format)' })
+  @IsPhoneNumber('IN', { message: 'Please provide a valid Indian phone number' })
+  @IsNotEmpty({ message: 'Phone number is required' })
   phone: string;
 
-  @IsEmail()
+  @ApiProperty({ example: 'john@example.com', required: false, description: 'Customer email address' })
+  @IsEmail({}, { message: 'Please provide a valid email address' })
   @IsOptional()
   email?: string;
 }
 
 export class UpdateCustomerDto {
-  @IsString()
+  @ApiProperty({ example: 'John Doe', required: false, description: 'Customer full name' })
+  @IsString({ message: 'Name must be a string' })
   @IsOptional()
-  @MinLength(2)
-  @MaxLength(100)
+  @MinLength(2, { message: 'Name must be at least 2 characters long' })
+  @MaxLength(100, { message: 'Name must not exceed 100 characters' })
   name?: string;
 
-  @IsPhoneNumber('IN')
+  @ApiProperty({ example: '+919876543210', required: false, description: 'Customer phone number (Indian format)' })
+  @IsPhoneNumber('IN', { message: 'Please provide a valid Indian phone number' })
   @IsOptional()
   phone?: string;
 
-  @IsEmail()
+  @ApiProperty({ example: 'john@example.com', required: false, description: 'Customer email address' })
+  @IsEmail({}, { message: 'Please provide a valid email address' })
   @IsOptional()
   email?: string;
 }
-
-// Added validation decorators - Modified: 2025-12-25 20:07:16
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-// Change line 16 for this commit
-// Change line 17 for this commit
-// Change line 18 for this commit
