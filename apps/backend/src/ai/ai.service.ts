@@ -7,6 +7,7 @@ export class AiService {
 
   /**
    * Check if GPT-5.1-Codex-Max is enabled for client
+   * ENABLED FOR ALL CLIENTS as of Jan 23, 2026
    */
   isGptCodexMaxEnabled(clientId?: string): boolean {
     if (AI_FEATURES.ENABLE_FOR_ALL_CLIENTS) {
@@ -55,5 +56,33 @@ export class AiService {
     
     // TODO: Implement actual API call to GPT-5.1-Codex-Max
     return `Code review completed using ${AI_FEATURES.GPT_5_1_CODEX_MAX.MODEL_VERSION}`;
+  }
+
+  /**
+   * Auto-complete code using GPT-5.1-Codex-Max
+   */
+  async autoComplete(code: string, cursor: number, clientId?: string): Promise<string> {
+    if (!this.isGptCodexMaxEnabled(clientId)) {
+      throw new Error('GPT-5.1-Codex-Max is not enabled for this client');
+    }
+
+    this.logger.log(`Auto-completing code for client: ${clientId || 'default'}`);
+    
+    // TODO: Implement actual API call to GPT-5.1-Codex-Max
+    return `// Auto-completion at position ${cursor}`;
+  }
+
+  /**
+   * Refactor code using GPT-5.1-Codex-Max
+   */
+  async refactorCode(code: string, instruction: string, clientId?: string): Promise<string> {
+    if (!this.isGptCodexMaxEnabled(clientId)) {
+      throw new Error('GPT-5.1-Codex-Max is not enabled for this client');
+    }
+
+    this.logger.log(`Refactoring code for client: ${clientId || 'default'}`);
+    
+    // TODO: Implement actual API call to GPT-5.1-Codex-Max
+    return `// Refactored code using ${AI_FEATURES.GPT_5_1_CODEX_MAX.MODEL_VERSION}\n// Instruction: ${instruction}`;
   }
 }

@@ -13,7 +13,7 @@ export class AiController {
   @Get('config')
   @ApiOperation({ 
     summary: 'Get AI model configuration',
-    description: 'Returns the current AI model configuration including GPT-5.1-Codex-Max settings'
+    description: 'Returns the current AI model configuration including GPT-5.1-Codex-Max settings. Enabled for all clients.'
   })
   @ApiResponse({ 
     status: 200, 
@@ -35,7 +35,7 @@ export class AiController {
   @Post('generate')
   @ApiOperation({ 
     summary: 'Generate code using GPT-5.1-Codex-Max',
-    description: 'Generate code based on natural language prompt using GPT-5.1-Codex-Max'
+    description: 'Generate code based on natural language prompt using GPT-5.1-Codex-Max. Available to all clients.'
   })
   @ApiResponse({ status: 200, description: 'Code generated successfully' })
   @ApiResponse({ status: 403, description: 'GPT-5.1-Codex-Max not enabled for client' })
@@ -47,12 +47,34 @@ export class AiController {
   @Post('review')
   @ApiOperation({ 
     summary: 'Review code using GPT-5.1-Codex-Max',
-    description: 'Review code quality and provide suggestions using GPT-5.1-Codex-Max'
+    description: 'Review code quality and provide suggestions using GPT-5.1-Codex-Max. Available to all clients.'
   })
   @ApiResponse({ status: 200, description: 'Code reviewed successfully' })
   @ApiResponse({ status: 403, description: 'GPT-5.1-Codex-Max not enabled for client' })
   async reviewCode(@Body() body: { code: string }, @Req() req: any) {
     const clientId = req.user?.id;
     return this.aiService.reviewCode(body.code, clientId);
+  }
+
+  @Post('autocomplete')
+  @ApiOperation({ 
+    summary: 'Auto-complete code using GPT-5.1-Codex-Max',
+    description: 'Provide intelligent code completion suggestions. Available to all clients.'
+  })
+  @ApiResponse({ status: 200, description: 'Auto-completion suggestions generated' })
+  async autoComplete(@Body() body: { code: string; cursor: number }, @Req() req: any) {
+    const clientId = req.user?.id;
+    return this.aiService.autoComplete(body.code, body.cursor, clientId);
+  }
+
+  @Post('refactor')
+  @ApiOperation({ 
+    summary: 'Refactor code using GPT-5.1-Codex-Max',
+    description: 'Refactor code based on specific instructions. Available to all clients.'
+  })
+  @ApiResponse({ status: 200, description: 'Code refactored successfully' })
+  async refactorCode(@Body() body: { code: string; instruction: string }, @Req() req: any) {
+    const clientId = req.user?.id;
+    return this.aiService.refactorCode(body.code, body.instruction, clientId);
   }
 }
