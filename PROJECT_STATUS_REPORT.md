@@ -10,7 +10,7 @@
 
 FlowForge is a **70% complete** SaaS platform for local businesses to manage WhatsApp automation, invoicing, and bookings. The backend API is nearly complete (95%), while the frontend UI (40%) and worker service (10%) need significant work.
 
-### Current State:
+### Current State 
 - ✅ All compilation errors **FIXED**
 - ✅ Prisma Client **GENERATED**
 - ✅ Backend builds **SUCCESSFULLY**
