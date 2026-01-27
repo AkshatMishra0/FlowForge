@@ -16,6 +16,7 @@
 - 📅 **Appointment Booking** - Customer self-service booking system
 - 🔄 **Google Calendar Sync** - Automatic calendar integration
 - 📈 **Analytics Dashboard** - Track leads, payments, bookings, and messages
+- 🤖 **AI-Powered Insights** - Smart recommendations and analytics
 
 ## 🛠️ Tech Stack
 
