@@ -13,10 +13,16 @@ export class HealthService {
   ) {}
 
   async check() {
+    const memUsage = process.memoryUsage();
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
       uptime: (Date.now() - this.startTime) / 1000,
+      memory: {
+        rss: Math.round(memUsage.rss / 1024 / 1024),
+        heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024),
+        heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024),
+      },
     };
   }
 
