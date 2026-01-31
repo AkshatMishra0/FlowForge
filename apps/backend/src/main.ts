@@ -48,8 +48,8 @@ async function bootstrap() {
   // Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('FlowForge API')
-    .setDescription('WhatsApp Automation & Smart Invoicing API - Comprehensive business management solution')
-    .setVersion('1.0.0')
+    .setDescription('WhatsApp Automation & Smart Invoicing API - Comprehensive business management solution with AI-powered features')
+    .setVersion('1.1.0')
     .addBearerAuth()
     .addTag('Authentication', 'User authentication and authorization')
     .addTag('Business', 'Business profile management')
@@ -59,6 +59,7 @@ async function bootstrap() {
     .addTag('Invoices', 'Invoice generation and payment tracking')
     .addTag('Analytics', 'Business analytics and insights')
     .addTag('WhatsApp', 'WhatsApp messaging integration')
+    .addTag('AI', 'AI-powered code completion and refactoring')
     .addTag('Health', 'Service health and monitoring')
     .build();
   const document = SwaggerModule.createDocument(app, config);
@@ -66,8 +67,9 @@ async function bootstrap() {
 
   const port = process.env.PORT || 4000;
   await app.listen(port);
-  console.log(`🚀 FlowForge API running on http://localhost:${port}`);
+  console.log(`🚀 FlowForge API v1.1.0 running on http://localhost:${port}`);
   console.log(`📚 API Docs available at http://localhost:${port}/api`);
+  console.log(`💚 Health Check: http://localhost:${port}/api/health`);
 }
 
 bootstrap();
