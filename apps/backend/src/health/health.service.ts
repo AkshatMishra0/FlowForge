@@ -14,16 +14,31 @@ export class HealthService {
 
   async check() {
     const memUsage = process.memoryUsage();
+    const uptimeSeconds = (Date.now() - this.startTime) / 1000;
+    
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
-      uptime: (Date.now() - this.startTime) / 1000,
+      uptime: uptimeSeconds,
+      uptimeFormatted: this.formatUptime(uptimeSeconds),
       memory: {
         rss: Math.round(memUsage.rss / 1024 / 1024),
         heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024),
         heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024),
       },
     };
+  }
+
+  private formatUptime(seconds: number): string {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    if (days > 0) return `${days}d ${hours}h ${minutes}m ${secs}s`;
+    if (hours > 0) return `${hours}h ${minutes}m ${secs}s`;
+    if (minutes > 0) return `${minutes}m ${secs}s`;
+    return `${secs}s`;
   }
 
   async detailedCheck() {
@@ -60,12 +75,15 @@ export class HealthService {
       return {
         status: 'ok',
         responseTime,
+        message: 'Database connection is healthy',
       };
     } catch (error) {
       this.logger.error('Database health check failed', error);
       return {
         status: 'error',
+        responseTime: 0,
         error: error.message,
+        message: 'Database connection failed',
       };
     }
   }
@@ -79,12 +97,15 @@ export class HealthService {
       return {
         status: 'ok',
         responseTime,
+        message: 'Redis cache is healthy',
       };
     } catch (error) {
       this.logger.error('Redis health check failed', error);
       return {
         status: 'error',
+        responseTime: 0,
         error: error.message,
+        message: 'Redis connection failed',
       };
     }
   }
