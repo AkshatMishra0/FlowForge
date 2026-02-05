@@ -18,6 +18,8 @@ export const CACHE_TTL = {
   MEDIUM: 300, // 5 minutes
   LONG: 3600, // 1 hour
   VERY_LONG: 86400, // 24 hours
+  DASHBOARD: 180, // 3 minutes - for dashboard data
+  ANALYTICS: 900, // 15 minutes - for analytics data
 };
 
 export const PAGINATION = {
