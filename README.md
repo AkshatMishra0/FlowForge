@@ -10,13 +10,15 @@
 ## 🌟 Features
 
 - 📱 **WhatsApp Automation** - Send automated follow-ups and messages
-- 📊 **Mini CRM** - Manage leads and customer relationships
+- 📊 **Mini CRM** - Manage leads and customer relationships  
 - 💰 **Smart Invoicing** - Create invoices with Razorpay payment links
 - ⏰ **Payment Reminders** - Automated WhatsApp reminders for overdue payments
 - 📅 **Appointment Booking** - Customer self-service booking system
 - 🔄 **Google Calendar Sync** - Automatic calendar integration
 - 📈 **Analytics Dashboard** - Track leads, payments, bookings, and messages
 - 🤖 **AI-Powered Insights** - Smart recommendations and analytics
+- 🔔 **Real-time Notifications** - Stay updated with instant alerts
+- 🔒 **Enterprise Security** - Role-based access control and audit logs
 
 ## 🛠️ Tech Stack
 
