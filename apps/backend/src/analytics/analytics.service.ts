@@ -7,6 +7,7 @@ export interface AnalyticsMetrics {
     convertedLeads: number;
     conversionRate: number;
     averageConversionTime: number; // in days
+    lostLeads: number;
   };
   revenueMetrics: {
     totalRevenue: number;
@@ -14,12 +15,14 @@ export interface AnalyticsMetrics {
     totalInvoices: number;
     paidInvoices: number;
     paymentSuccessRate: number;
+    overdueAmount: number;
   };
   customerMetrics: {
     totalCustomers: number;
     activeCustomers: number;
     repeatCustomers: number;
     customerRetentionRate: number;
+    newCustomersThisPeriod: number;
   };
   bookingMetrics: {
     totalBookings: number;
