@@ -73,6 +73,7 @@ export class AuthService {
 
     if (!isPasswordValid) {
       this.logger.warn(`Sign-in failed: Invalid password for ${dto.email}`);
+      // TODO: Implement failed login attempt tracking for rate limiting
       throw new UnauthorizedException('Invalid credentials');
     }
 

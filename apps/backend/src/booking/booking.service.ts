@@ -25,6 +25,12 @@ export class BookingService {
       throw new BadRequestException('Valid customer phone number is required');
     }
 
+    // Validate customer name
+    if (!dto.customerName || dto.customerName.trim().length < 2) {
+      this.logger.warn(`Invalid customer name provided: ${dto.customerName}`);
+      throw new BadRequestException('Customer name must be at least 2 characters');
+    }
+
     // Validate booking time is in the future
     const bookingDate = new Date(dto.bookingDate);
     const now = new Date();
