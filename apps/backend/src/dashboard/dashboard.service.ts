@@ -10,36 +10,41 @@ export class DashboardService {
   async getStats(businessId: string) {
     this.logger.log(`Fetching dashboard stats for business: ${businessId}`);
     
-    const [
-      totalLeads,
-      totalInvoices,
-      totalBookings,
-      totalMessages,
-      paidInvoices,
-      pendingBookings,
-    ] = await Promise.all([
-      this.prisma.lead.count({ where: { businessId } }),
-      this.prisma.invoice.count({ where: { businessId } }),
-      this.prisma.booking.count({ where: { businessId } }),
-      this.prisma.messageLog.count({ where: { businessId } }),
-      this.prisma.invoice.count({ where: { businessId, status: 'paid' } }),
-      this.prisma.booking.count({ where: { businessId, status: 'pending' } }),
-    ]);
+    try {
+      const [
+        totalLeads,
+        totalInvoices,
+        totalBookings,
+        totalMessages,
+        paidInvoices,
+        pendingBookings,
+      ] = await Promise.all([
+        this.prisma.lead.count({ where: { businessId } }),
+        this.prisma.invoice.count({ where: { businessId } }),
+        this.prisma.booking.count({ where: { businessId } }),
+        this.prisma.messageLog.count({ where: { businessId } }),
+        this.prisma.invoice.count({ where: { businessId, status: 'paid' } }),
+        this.prisma.booking.count({ where: { businessId, status: 'pending' } }),
+      ]);
 
-    const totalRevenue = await this.prisma.invoice.aggregate({
-      where: { businessId, status: 'paid' },
-      _sum: { totalAmount: true },
-    });
+      const totalRevenue = await this.prisma.invoice.aggregate({
+        where: { businessId, status: 'paid' },
+        _sum: { totalAmount: true },
+      });
 
-    return {
-      totalLeads,
-      totalInvoices,
-      totalBookings,
-      totalMessages,
-      paidInvoices,
-      pendingBookings,
-      totalRevenue: totalRevenue._sum.totalAmount || 0,
-    };
+      return {
+        totalLeads,
+        totalInvoices,
+        totalBookings,
+        totalMessages,
+        paidInvoices,
+        pendingBookings,
+        totalRevenue: totalRevenue._sum.totalAmount || 0,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch dashboard stats for business ${businessId}`, error);
+      throw error;
+    }
   }
 
   async getRecentActivity(businessId: string) {
