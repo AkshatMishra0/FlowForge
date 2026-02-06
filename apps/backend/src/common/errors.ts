@@ -68,3 +68,17 @@ export class BusinessLogicError extends AppError {
   }
 }
 
+export class ServiceUnavailableError extends AppError {
+  constructor(service: string, message?: string) {
+    const errorMessage = message || `${service} service is currently unavailable`;
+    super('SERVICE_UNAVAILABLE', errorMessage, 503);
+    this.name = 'ServiceUnavailableError';
+  }
+}
+
+export class BadRequestError extends AppError {
+  constructor(message: string, details?: any) {
+    super('BAD_REQUEST', message, 400, details);
+    this.name = 'BadRequestError';
+  }
+}
