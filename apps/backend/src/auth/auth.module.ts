@@ -6,6 +6,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { RateLimiterService } from './rate-limiter.service';
+import { CacheModule } from '../cache/cache.module';
 
 @Module({
   imports: [
@@ -17,9 +19,10 @@ import { GoogleStrategy } from './strategies/google.strategy';
         signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') || '7d' },
       }),
     }),
+    CacheModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy],
-  exports: [AuthService, JwtStrategy, PassportModule],
+  providers: [AuthService, JwtStrategy, GoogleStrategy, RateLimiterService],
+  exports: [AuthService, JwtStrategy, PassportModule, RateLimiterService],
 })
 export class AuthModule {}

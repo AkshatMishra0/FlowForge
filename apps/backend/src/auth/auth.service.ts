@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { RateLimiterService } from './rate-limiter.service';
 import * as bcrypt from 'bcrypt';
 import { SignUpDto, SignInDto } from './dto/auth.dto';
 
@@ -10,7 +11,8 @@ export class AuthService {
 
   constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private rateLimiter: RateLimiterService
   ) {}
 
   async signUp(dto: SignUpDto) {
@@ -58,6 +60,16 @@ export class AuthService {
   async signIn(dto: SignInDto) {
     this.logger.log(`Sign-in attempt for email: ${dto.email}`);
     
+    // Check if account is blocked due to too many failed attempts
+    const isBlocked = await this.rateLimiter.isBlocked(dto.email);
+    if (isBlocked) {
+      const timeRemaining = await this.rateLimiter.getBlockTimeRemaining(dto.email);
+      this.logger.warn(`Sign-in blocked for ${dto.email}. Time remaining: ${timeRemaining}s`);
+      throw new UnauthorizedException(
+        `Too many failed login attempts. Please try again in ${Math.ceil(timeRemaining / 60)} minutes.`
+      );
+    }
+    
     // Find user
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -65,6 +77,7 @@ export class AuthService {
 
     if (!user || !user.password) {
       this.logger.warn(`Sign-in failed: Invalid credentials for ${dto.email}`);
+      await this.rateLimiter.recordFailedAttempt(dto.email);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -73,9 +86,18 @@ export class AuthService {
 
     if (!isPasswordValid) {
       this.logger.warn(`Sign-in failed: Invalid password for ${dto.email}`);
-      // TODO: Implement failed login attempt tracking for rate limiting
-      throw new UnauthorizedException('Invalid credentials');
+      await this.rateLimiter.recordFailedAttempt(dto.email);
+      
+      const remaining = await this.rateLimiter.getRemainingAttempts(dto.email);
+      const message = remaining > 0 
+        ? `Invalid credentials. ${remaining} attempts remaining.`
+        : 'Account temporarily locked due to too many failed attempts.';
+      
+      throw new UnauthorizedException(message);
     }
+
+    // Clear failed attempts on successful login
+    await this.rateLimiter.clearAttempts(dto.email);
 
     // Generate token
     const token = this.generateToken(user.id, user.email);
