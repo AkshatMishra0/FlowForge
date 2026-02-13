@@ -14,6 +14,9 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { CacheModule } from './cache/cache.module';
 import { HealthModule } from './health/health.module';
 import { AiModule } from './ai/ai.module';
+import { EmailModule } from './email/email.module';
+import { ReportsModule } from './reports/reports.module';
+import { BulkOperationsModule } from './bulk-operations/bulk-operations.module';
 
 @Module({
   imports: [
@@ -39,6 +42,9 @@ import { AiModule } from './ai/ai.module';
     SchedulerModule,
     AnalyticsModule,
     AiModule,
+    EmailModule,
+    ReportsModule,
+    BulkOperationsModule,
   ],
 })
 export class AppModule {}
