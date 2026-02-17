@@ -17,6 +17,8 @@ import { AiModule } from './ai/ai.module';
 import { EmailModule } from './email/email.module';
 import { ReportsModule } from './reports/reports.module';
 import { BulkOperationsModule } from './bulk-operations/bulk-operations.module';
+import { SearchModule } from './search/search.module';
+import { PerformanceModule } from './performance/performance.module';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { BulkOperationsModule } from './bulk-operations/bulk-operations.module';
     EmailModule,
     ReportsModule,
     BulkOperationsModule,
+    SearchModule,
+    PerformanceModule,
   ],
 })
 export class AppModule {}
