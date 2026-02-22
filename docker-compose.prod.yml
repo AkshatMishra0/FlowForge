@@ -6,7 +6,7 @@ services:
     container_name: flowforge-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: postgres 
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: flowforge
     ports:
@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck: 
       test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 10s
+      interval:  
       timeout: 5s
       retries: 5
 
