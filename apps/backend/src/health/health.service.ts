@@ -1,11 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
+import * as os from 'os';
+
+interface HealthHistory {
+  timestamp: Date;
+  status: string;
+  responseTime: number;
+}
 
 @Injectable()
 export class HealthService {
   private readonly logger = new Logger(HealthService.name);
   private readonly startTime = Date.now();
+  private healthHistory: HealthHistory[] = [];
+  private readonly maxHistorySize = 100;
 
   constructor(
     private prisma: PrismaService,
@@ -15,6 +24,7 @@ export class HealthService {
   async check() {
     const memUsage = process.memoryUsage();
     const uptimeSeconds = (Date.now() - this.startTime) / 1000;
+    const cpuUsage = process.cpuUsage();
     
     return {
       status: 'ok',
@@ -25,6 +35,19 @@ export class HealthService {
         rss: Math.round(memUsage.rss / 1024 / 1024),
         heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024),
         heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024),
+        external: Math.round(memUsage.external / 1024 / 1024),
+      },
+      cpu: {
+        user: Math.round(cpuUsage.user / 1000),
+        system: Math.round(cpuUsage.system / 1000),
+      },
+      system: {
+        platform: os.platform(),
+        arch: os.arch(),
+        nodeVersion: process.version,
+        totalMemory: Math.round(os.totalmem() / 1024 / 1024),
+        freeMemory: Math.round(os.freemem() / 1024 / 1024),
+        cpuCount: os.cpus().length,
       },
     };
   }
@@ -53,15 +76,24 @@ export class HealthService {
     const allHealthy = Object.values(services).every((s) => s.status === 'ok');
     const totalResponseTime = Date.now() - startTime;
 
+    // Track health history
+    this.addToHistory({
+      timestamp: new Date(),
+      status: allHealthy ? 'ok' : 'degraded',
+      responseTime: totalResponseTime,
+    });
+
     return {
       status: allHealthy ? 'ok' : 'degraded',
       timestamp: new Date().toISOString(),
       uptime: (Date.now() - this.startTime) / 1000,
+      uptimeFormatted: this.formatUptime((Date.now() - this.startTime) / 1000),
       totalCheckDuration: totalResponseTime,
       services,
       memory: {
-        used: process.memoryUsage().heapUsed / 1024 / 1024,
-        total: process.memoryUsage().heapTotal / 1024 / 1024,
+        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+        percentage: Math.round((process.memoryUsage().heapUsed / process.memoryUsage().heapTotal) * 100),
       },
     };
   }
@@ -125,6 +157,48 @@ export class HealthService {
     return {
       status: 'ok',
       configured,
+    };
+  }
+
+  private addToHistory(entry: HealthHistory) {
+    this.healthHistory.push(entry);
+    if (this.healthHistory.length > this.maxHistorySize) {
+      this.healthHistory.shift();
+    }
+  }
+
+  getHealthHistory() {
+    return {
+      history: this.healthHistory,
+      stats: this.calculateHistoryStats(),
+    };
+  }
+
+  private calculateHistoryStats() {
+    if (this.healthHistory.length === 0) {
+      return {
+        averageResponseTime: 0,
+        healthyCount: 0,
+        degradedCount: 0,
+        uptimePercentage: 100,
+      };
+    }
+
+    const totalResponseTime = this.healthHistory.reduce(
+      (sum, entry) => sum + entry.responseTime,
+      0,
+    );
+    const healthyCount = this.healthHistory.filter(
+      (entry) => entry.status === 'ok',
+    ).length;
+    const degradedCount = this.healthHistory.length - healthyCount;
+
+    return {
+      averageResponseTime: Math.round(totalResponseTime / this.healthHistory.length),
+      healthyCount,
+      degradedCount,
+      uptimePercentage: Math.round((healthyCount / this.healthHistory.length) * 100),
+      totalChecks: this.healthHistory.length,
     };
   }
 }

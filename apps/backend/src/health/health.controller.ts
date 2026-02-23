@@ -53,4 +53,29 @@ export class HealthController {
   async detailedCheck() {
     return this.healthService.detailedCheck();
   }
+
+  @Get('history')
+  @ApiOperation({ 
+    summary: 'Health check history',
+    description: 'Get historical health check data and statistics'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Health history and statistics',
+    schema: {
+      example: {
+        history: [],
+        stats: {
+          averageResponseTime: 15,
+          healthyCount: 95,
+          degradedCount: 5,
+          uptimePercentage: 95,
+          totalChecks: 100
+        }
+      }
+    }
+  })
+  async getHealthHistory() {
+    return this.healthService.getHealthHistory();
+  }
 }
