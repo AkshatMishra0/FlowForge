@@ -1,31 +1,48 @@
 # FlowForge 🚀
 
-**WhatsApp Automation + Smart Invoicing + Payment Reminder SaaS for Local Businesses**
+**Modern SaaS Platform for Local Businesses: WhatsApp Automation + Smart Invoicing + CRM + Booking System**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Stars](https://img.shields.io/github/stars/AkshatMishra0/FlowForge?style=social)](https://github.com/AkshatMishra0/FlowForge)
 [![CI](https://github.com/AkshatMishra0/FlowForge/workflows/CI/badge.svg)](https://github.com/AkshatMishra0/FlowForge/actions)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/AkshatMishra0/FlowForge/pulls)
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-10.3-E0234E)](https://nestjs.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+
+---
 
 ## 🌟 Features
 
-- 📱 **WhatsApp Automation** - Send automated follow-ups and messages
-- 📊 **Mini CRM** - Manage leads and customer relationships  
-- 💰 **Smart Invoicing** - Create invoices with Razorpay payment links
-- ⏰ **Payment Reminders** - Automated WhatsApp reminders for overdue payments
-- 📅 **Appointment Booking** - Customer self-service booking system
-- 🔄 **Google Calendar Sync** - Automatic calendar integration
-- 📈 **Analytics Dashboard** - Track leads, payments, bookings, and messages
-- 🤖 **AI-Powered Insights** - Smart recommendations and analytics
-- 🔔 **Real-time Notifications** - Stay updated with instant alerts
-- 🔒 **Enterprise Security** - Role-based access control and audit logs
-- 🔍 **Advanced Search** - Global search across all entities with smart suggestions
-- 📊 **Comprehensive Reports** - Revenue reports, conversion analytics, data exports
-- ⚡ **Bulk Operations** - Manage multiple records efficiently
-- 📧 **Email Service** - Professional email notifications for invoices and bookings
-- 🛡️ **Rate Limiting** - Intelligent login protection with automatic blocking
-- 📊 **Performance Monitoring** - Track application performance and bottlenecks
+### Core Functionality
+- 📱 **WhatsApp Automation** - Send automated messages, follow-ups, and notifications via WhatsApp Cloud API
+- 💼 **Mini CRM** - Complete lead management with status tracking, assignment, and activity logs
+- 💰 **Smart Invoicing** - Create professional invoices with integrated Razorpay payment links
+- ⏰ **Payment Reminders** - Automated WhatsApp reminders for overdue payments (same day, 1-day, 7-day)
+- 📅 **Appointment Booking** - Customer self-service booking system with confirmation emails
+- 🔄 **Google Calendar Sync** - Automatic two-way calendar synchronization
+- 📈 **Analytics Dashboard** - Real-time insights on leads, revenue, bookings, and messages
+
+### Advanced Features (February 2026 Updates)
+- 🔒 **Enterprise Security** - Role-based access control (RBAC) with granular permissions
+- 🛡️ **Rate Limiting** - Intelligent login protection with automatic blocking and user tracking
+- 🔍 **Advanced Search** - Global search across all entities with smart suggestions and filters
+- 📊 **Comprehensive Reports** - Revenue analytics, lead conversion tracking, CSV/JSON exports
+- ⚡ **Bulk Operations** - Manage multiple leads, invoices, and bookings efficiently
+- 📧 **Email Service** - Professional HTML email templates for invoices and bookings
+- 📊 **Performance Monitoring** - Real-time performance tracking with metrics and bottleneck detection
 - 💬 **Message Interface** - WhatsApp-style chat interface for customer communications
+- 🏥 **Health Monitoring** - Advanced health checks with system metrics and historical tracking
+- 🔐 **Enhanced Logging** - Request logging with security, metrics, and sensitive data redaction
+
+### Developer Experience
+- 🎨 **UI Component Library** - Comprehensive set of reusable React components
+- 🪝 **Custom React Hooks** - useAsync, useDebounce, useLocalStorage, useMediaQuery
+- 📝 **API Documentation** - Complete Swagger/OpenAPI documentation
+- ✅ **Comprehensive Testing** - Unit tests, E2E tests, and integration tests
+- 🔧 **Developer Tools** - Makefile for common tasks, EditorConfig for consistency
+- 🔍 **Type Safety** - 100% TypeScript with strict mode enabled
+- 📋 **Environment Validation** - Automatic validation of environment variables
 
 ## 🛠️ Tech Stack
 
@@ -70,10 +87,10 @@ flowforge/
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 18+ and npm
 - PostgreSQL 14+
 - Redis 6+
-- npm or yarn
+- Git
 
 ### Installation
 
@@ -85,40 +102,77 @@ cd flowforge
 
 2. **Install dependencies**
 ```bash
+make install
+# or
 npm install
 ```
 
 3. **Set up environment variables**
 ```bash
+make setup
+# or manually:
 cp .env.example .env
 # Edit .env with your actual credentials
 ```
 
 4. **Set up database**
 ```bash
-# Start PostgreSQL and Redis with Docker
+# Start PostgreSQL and Redis with Docker (recommended)
+make docker-up
+# or
 docker-compose up -d
 
-# Generate Prisma client
-npm run db:generate
-
 # Run migrations
-npm run db:migrate
+make migrate
+# or
+cd apps/backend && npx prisma migrate dev
 
-# (Optional) Seed database
-npm run db:seed
+# (Optional) Seed database with sample data
+make seed
 ```
 
 5. **Start development servers**
 ```bash
 # Start all services (frontend, backend, worker)
+make dev
+# or
 npm run dev
 ```
 
 Access the application:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:4000
-- API Docs: http://localhost:4000/api
+- **Frontend:** http://localhost:3000
+- **Backend API:** http://localhost:4000
+- **API Docs (Swagger):** http://localhost:4000/api/docs
+- **Prisma Studio:** `make db-studio`
+
+### Using Makefile Commands
+
+FlowForge includes a Makefile for common development tasks:
+
+```bash
+# Development
+make dev          # Start all services
+make build        # Build all applications
+make test         # Run tests
+make lint         # Lint code
+make format       # Format code
+
+# Database
+make migrate      # Run migrations
+make seed         # Seed database
+make db-studio    # Open Prisma Studio
+
+# Docker
+make docker-up    # Start Docker services
+make docker-down  # Stop Docker services
+make docker-logs  # View logs
+
+# Utilities
+make clean        # Clean build artifacts
+make help         # Show all available commands
+```
+
+See [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) for detailed development instructions.
 
 ### Production Build
 
