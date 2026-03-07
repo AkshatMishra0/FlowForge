@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+﻿import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
 import { CACHE_TTL } from '../common/constants';
@@ -28,29 +28,49 @@ export class CustomerService {
     private cache: CacheService,
   ) {}
 
-  async findAll(businessId: string) {
+  async findAll(businessId: string, options?: { page?: number; limit?: number }) {
     if (!businessId) {
       this.logger.error('BusinessId is required for findAll operation');
       throw new Error('BusinessId is required');
     }
 
-    const cacheKey = `customers:${businessId}`;
-    const cached = await this.cache.get<any[]>(cacheKey);
-    
+    const { page = 1, limit = 50 } = options || {};
+    const skip = (page - 1) * limit;
+
+    const cacheKey = `customers:${businessId}:p${page}:l${limit}`;
+    const cached = await this.cache.get<any>(cacheKey);
+
     if (cached) {
-      this.logger.debug(`Cache hit for customers:${businessId}`);
+      this.logger.debug(`Cache hit for ${cacheKey}`);
       return cached;
     }
 
-    this.logger.log(`Fetching customers for business: ${businessId}`);
-    const customers = await this.prisma.customer.findMany({
-      where: { businessId },
-      orderBy: { createdAt: 'desc' },
-    });
+    this.logger.log(`Fetching customers for business: ${businessId} (page ${page}, limit ${limit})`);
 
-    await this.cache.set(cacheKey, customers, CACHE_TTL.MEDIUM);
+    const [customers, total] = await Promise.all([
+      this.prisma.customer.findMany({
+        where: { businessId },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.customer.count({ where: { businessId } }),
+    ]);
+
+    const result = {
+      customers,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: page * limit < total,
+      },
+    };
+
+    await this.cache.set(cacheKey, result, CACHE_TTL.MEDIUM);
     this.logger.debug(`Cached ${customers.length} customers for business ${businessId}`);
-    return customers;
+    return result;
   }
 
   async findOne(id: string) {
@@ -197,41 +217,3 @@ export class CustomerService {
     }
   }
 }
-
-// Enhanced customer insights algorithm - Modified: 2025-12-25 20:07:13
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-
-// Enhanced customer insights algorithm - Modified: 2025-12-25 20:07:37
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-// Change line 16 for this commit
-// Change line 17 for this commit

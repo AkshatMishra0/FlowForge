@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+﻿import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface NotificationPayload {
@@ -160,41 +160,31 @@ export class NotificationService {
     this.logger.log(`Cleaned up ${result.count} old notification logs`);
     return result;
   }
-}
 
-// Added notification templates - Modified: 2025-12-25 20:07:18
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-// Change line 16 for this commit
+  async isDuplicateNotification(
+    businessId: string,
+    customerId: string,
+    type: string,
+    windowMinutes: number = 60,
+  ): Promise<boolean> {
+    const windowStart = new Date();
+    windowStart.setMinutes(windowStart.getMinutes() - windowMinutes);
 
-// Added email notification templates - Modified: 2025-12-25 20:07:42
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
+    const recent = await this.prisma.notificationLog.findFirst({
+      where: {
+        businessId,
+        customerId,
+        type,
+        status: 'sent',
+        sentAt: { gte: windowStart },
+      },
+    });
+
+    if (recent) {
+      this.logger.warn(
+        `Duplicate notification prevented for customer ${customerId} (type: ${type}, last sent: ${recent.sentAt})`,
+      );
+      return true;
+    }
+
+    return false;
