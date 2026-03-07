@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
+﻿import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { SchedulerService } from '../scheduler/scheduler.service';
@@ -231,17 +231,35 @@ ${business.name}`;
     
     return false;
   }
+
+  async checkSlotAvailability(
+    businessId: string,
+    bookingDate: string,
+    startTime: string,
+    endTime: string,
+    excludeBookingId?: string,
+  ): Promise<{ available: boolean; conflicts: any[] }> {
+    const conflicts = await this.prisma.booking.findMany({
+      where: {
+        businessId,
+        bookingDate: new Date(bookingDate),
+        status: { notIn: ['cancelled'] },
+        id: excludeBookingId ? { not: excludeBookingId } : undefined,
+        OR: [
+          { startTime: { gte: startTime, lt: endTime } },
+          { endTime: { gt: startTime, lte: endTime } },
+          { startTime: { lte: startTime }, endTime: { gte: endTime } },
+        ],
+      },
+      select: {
+        id: true,
+        customerName: true,
+        startTime: true,
+        endTime: true,
+        serviceName: true,
+      },
+    });
+
+    return { available: conflicts.length === 0, conflicts };
+  }
 }
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
