@@ -48,47 +48,59 @@ export class DashboardService {
   }
 
   async getRecentActivity(businessId: string) {
-    const [leads, invoices, bookings, messages] = await Promise.all([
-      this.prisma.lead.findMany({
-        where: { businessId },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-      }),
-      this.prisma.invoice.findMany({
-        where: { businessId },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-        include: { lead: true },
-      }),
-      this.prisma.booking.findMany({
-        where: { businessId },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-        include: { lead: true },
-      }),
-      this.prisma.messageLog.findMany({
-        where: { businessId },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-        include: { lead: true },
-      }),
-    ]);
+    this.logger.log(`Fetching recent activity for business: ${businessId}`);
+    
+    try {
+      const [leads, invoices, bookings, messages] = await Promise.all([
+        this.prisma.lead.findMany({
+          where: { businessId },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+        }),
+        this.prisma.invoice.findMany({
+          where: { businessId },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          include: { lead: true },
+        }),
+        this.prisma.booking.findMany({
+          where: { businessId },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          include: { lead: true },
+        }),
+        this.prisma.messageLog.findMany({
+          where: { businessId },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          include: { lead: true },
+        }),
+      ]);
 
-    return { 
-      leads, 
-      invoices, 
-      bookings, 
-      messages,
-      metadata: {
-        fetchedAt: new Date(),
-        businessId,
-      }
-    };
+      return { 
+        leads, 
+        invoices, 
+        bookings, 
+        messages,
+        metadata: {
+          fetchedAt: new Date(),
+          businessId,
+        }
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch recent activity for business ${businessId}`, error);
+      throw error;
+    }
   }
 
   async getPerformanceMetrics(businessId: string, days: number = 30) {
+    this.logger.log(`Fetching performance metrics for business: ${businessId} (${days} days)`);
+    
+    // Validate days parameter
+    const validDays = Math.max(1, Math.min(days, 365)); // Limit between 1 and 365 days
+    
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    startDate.setDate(startDate.getDate() - validDays);
 
     const [newLeads, convertedLeads, totalBookings] = await Promise.all([
       this.prisma.lead.count({
@@ -105,7 +117,7 @@ export class DashboardService {
     const conversionRate = newLeads > 0 ? (convertedLeads / newLeads) * 100 : 0;
 
     return {
-      period: `${days} days`,
+      period: `${validDays} days`,
       newLeads,
       convertedLeads,
       conversionRate: parseFloat(conversionRate.toFixed(2)),
