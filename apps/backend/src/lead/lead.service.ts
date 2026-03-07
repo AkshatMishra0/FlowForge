@@ -138,4 +138,16 @@ export class LeadService {
 
     return results;
   }
+
+  async getLeadsByStatus(businessId: string, status: string) {
+    return this.prisma.lead.findMany({
+      where: { businessId, status },
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        _count: {
+          select: { messageLogs: true, invoices: true, bookings: true },
+        },
+      },
+    });
+  }
 }
