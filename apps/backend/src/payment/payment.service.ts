@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+﻿import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
@@ -34,7 +34,7 @@ export class PaymentService {
   }
 
   async createPaymentLink(options: PaymentLinkOptions): Promise<any> {
-    try {
+    return this.retryWithBackoff(async () => {
       const paymentLink = await this.razorpay.paymentLink.create({
         amount: options.amount * 100, // Convert to paise
         currency: options.currency || 'INR',
@@ -48,10 +48,7 @@ export class PaymentService {
 
       this.logger.log(`Payment link created: ${paymentLink.id}`);
       return paymentLink;
-    } catch (error) {
-      this.logger.error('Failed to create payment link', error);
-      throw error;
-    }
+    });
   }
 
   async getPaymentLink(paymentLinkId: string): Promise<any> {
@@ -153,44 +150,28 @@ export class PaymentService {
       throw error;
     }
   }
+
+  private async retryWithBackoff<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 500,
+  ): Promise<T> {
+    let lastError: Error;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        if (attempt < maxRetries) {
+          const delay = baseDelay * Math.pow(2, attempt - 1);
+          this.logger.warn(
+            `Payment API attempt ${attempt}/${maxRetries} failed, retrying in ${delay}ms`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    }
+    this.logger.error(`Payment API failed after ${maxRetries} attempts`);
+    throw lastError;
+  }
 }
-
-// Implemented Razorpay integration - Modified: 2025-12-25 20:07:17
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-// Change line 16 for this commit
-// Change line 17 for this commit
-// Change line 18 for this commit
-// Change line 19 for this commit
-// Change line 20 for this commit
-
-// Improved payment error handling - Modified: 2025-12-25 20:07:39
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
