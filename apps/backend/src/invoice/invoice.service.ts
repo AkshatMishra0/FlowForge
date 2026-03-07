@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+﻿import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RazorpayClient } from './razorpay.client';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
@@ -245,43 +245,36 @@ ${invoice.business.name}`;
     const lastNumber = parseInt(lastInvoice.invoiceNumber.split('-')[1]);
     return `INV-${String(lastNumber + 1).padStart(4, '0')}`;
   }
+
+  async getInvoiceStats(businessId: string) {
+    const now = new Date();
+
+    const [total, paid, sent, revenueAgg, overdueCount] = await Promise.all([
+      this.prisma.invoice.count({ where: { businessId } }),
+      this.prisma.invoice.count({ where: { businessId, status: 'paid' } }),
+      this.prisma.invoice.count({ where: { businessId, status: 'sent' } }),
+      this.prisma.invoice.aggregate({
+        where: { businessId, status: 'paid' },
+        _sum: { totalAmount: true },
+        _avg: { totalAmount: true },
+      }),
+      this.prisma.invoice.count({
+        where: {
+          businessId,
+          status: { in: ['sent', 'draft'] },
+          dueDate: { lt: now },
+        },
+      }),
+    ]);
+
+    return {
+      total,
+      paid,
+      pending: sent,
+      overdue: overdueCount,
+      totalRevenue: revenueAgg._sum.totalAmount || 0,
+      averageInvoiceValue: Math.round((revenueAgg._avg.totalAmount || 0) * 100) / 100,
+      paymentRate: total > 0 ? Math.round((paid / total) * 100) : 0,
+    };
+  }
 }
-
-// Added payment reminder scheduling - Modified: 2025-12-25 20:07:28
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-// Change line 16 for this commit
-// Change line 17 for this commit
-
-// Added invoice generation templates - Modified: 2025-12-25 20:07:39
-// Added lines for commit changes
-// Change line 1 for this commit
-// Change line 2 for this commit
-// Change line 3 for this commit
-// Change line 4 for this commit
-// Change line 5 for this commit
-// Change line 6 for this commit
-// Change line 7 for this commit
-// Change line 8 for this commit
-// Change line 9 for this commit
-// Change line 10 for this commit
-// Change line 11 for this commit
-// Change line 12 for this commit
-// Change line 13 for this commit
-// Change line 14 for this commit
-// Change line 15 for this commit
-// Change line 16 for this commit
