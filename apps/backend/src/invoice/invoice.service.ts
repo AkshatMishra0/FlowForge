@@ -277,4 +277,29 @@ ${invoice.business.name}`;
       paymentRate: total > 0 ? Math.round((paid / total) * 100) : 0,
     };
   }
+
+  async getOverdueInvoices(businessId: string) {
+    const now = new Date();
+
+    const invoices = await this.prisma.invoice.findMany({
+      where: {
+        businessId,
+        status: { in: ['sent', 'draft'] },
+        dueDate: { lt: now },
+      },
+      include: { items: true },
+      orderBy: { dueDate: 'asc' },
+    });
+
+    const totalOverdueAmount = invoices.reduce(
+      (sum, inv) => sum + inv.totalAmount,
+      0,
+    );
+
+    return {
+      invoices,
+      count: invoices.length,
+      totalOverdueAmount: Math.round(totalOverdueAmount * 100) / 100,
+    };
+  }
 }
