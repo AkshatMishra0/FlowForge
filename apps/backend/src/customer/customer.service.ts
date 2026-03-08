@@ -80,6 +80,13 @@ export class CustomerService {
         invoices: true,
         bookings: true,
         messages: true,
+        _count: {
+          select: {
+            invoices: true,
+            bookings: true,
+            messages: true,
+          },
+        },
       },
     });
   }
