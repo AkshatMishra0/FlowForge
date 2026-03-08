@@ -185,4 +185,30 @@ export class AuthService {
       where: { id: userId },
     });
   }
+
+  async getUserBusinesses(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        businesses: {
+          select: {
+            id: true,
+            name: true,
+            plan: true,
+            createdAt: true,
+            _count: {
+              select: { leads: true, invoices: true, bookings: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    this.logger.log(`Fetched businesses for user ${userId}: ${user.businesses.length} found`);
+    return user.businesses;
+  }
 }
