@@ -88,6 +88,12 @@ export class AnalyticsService {
     return { createdAt: filter };
   }
 
+  buildDateRange(days: number): { startDate: Date; endDate: Date } {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    return { startDate, endDate };
+  }
   private async getLeadConversionMetrics(businessId: string, dateFilter: any) {
     const leads = await this.prisma.lead.findMany({
       where: { businessId, ...dateFilter },
