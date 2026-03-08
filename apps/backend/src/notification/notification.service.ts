@@ -188,3 +188,39 @@ export class NotificationService {
     }
 
     return false;
+  }
+
+  async sendBatchNotifications(
+    payloads: NotificationPayload[],
+    skipDuplicates: boolean = true,
+    duplicateWindowMinutes: number = 60,
+  ) {
+    const results = { sent: 0, skipped: 0, failed: 0 };
+
+    for (const payload of payloads) {
+      try {
+        if (skipDuplicates) {
+          const isDuplicate = await this.isDuplicateNotification(
+            payload.businessId,
+            payload.customerId,
+            payload.type,
+            duplicateWindowMinutes,
+          );
+          if (isDuplicate) {
+            results.skipped++;
+            continue;
+          }
+        }
+
+        await this.logNotification(payload, 'sent');
+        results.sent++;
+      } catch (error) {
+        this.logger.error(`Batch notification failed for customer ${payload.customerId}`, error);
+        results.failed++;
+      }
+    }
+
+    this.logger.log(`Batch notifications: sent=${results.sent}, skipped=${results.skipped}, failed=${results.failed}`);
+    return results;
+  }
+}
