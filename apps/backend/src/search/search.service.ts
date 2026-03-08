@@ -247,4 +247,34 @@ export class SearchService {
 
     return Array.from(new Set(suggestions)).slice(0, 10);
   }
+
+  async globalSearchWithMeta(options: SearchOptions & { includeScore?: boolean }) {
+    const startTime = Date.now();
+    const result = await this.globalSearch(options);
+    const duration = Date.now() - startTime;
+
+    const scoreResults = (items: any[], queryLower: string) =>
+      items
+        .map((item) => {
+          const nameField = item.name || item.customerName || item.invoiceNumber || '';
+          const score = nameField.toLowerCase().startsWith(queryLower) ? 2 : 1;
+          return { ...item, _score: score };
+        })
+        .sort((a, b) => b._score - a._score);
+
+    const q = options.query.toLowerCase();
+
+    return {
+      ...result,
+      leads: scoreResults(result.leads, q),
+      invoices: scoreResults(result.invoices, q),
+      bookings: scoreResults(result.bookings, q),
+      meta: {
+        query: options.query,
+        durationMs: duration,
+        totalResults: result.totalResults,
+        searchedAt: new Date().toISOString(),
+      },
+    };
+  }
 }
