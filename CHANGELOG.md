@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - March 2026
+- **Lead Search:** Full-text search across leads with pagination support (name, phone, email, company, notes)
+- **Bulk Lead Import:** New `bulkCreateLeads` method with per-lead validation and duplicate phone detection
+- **Invoice Statistics:** `getInvoiceStats` endpoint returning payment rates, overdue counts, and average invoice value
+- **Weekly Revenue Trend:** Analytics service now computes week-by-week revenue breakdown for configurable lookback windows
+- **Customer Pagination:** Customer listing now supports `page`/`limit` pagination with total count metadata
+- **Payment Retry Logic:** Exponential backoff retry mechanism for transient Razorpay API failures
+- **Notification Deduplication:** `isDuplicateNotification` check prevents sending duplicate alerts within a configurable time window
+
+### Fixed - March 2026
+- Removed stale auto-generated comment blocks from lead, invoice, analytics, customer, notification, auth, and payment services
+- Dashboard `getRecentActivity` now wraps parallel queries in try/catch with structured error logging
+- Dashboard `getPerformanceMetrics` validates `days` parameter to prevent out-of-range queries (clamped 1–365)
+
+### Changed - March 2026
+- Customer `findAll` now returns `{ customers, pagination }` object instead of a flat array
+- Payment link creation uses retry-with-backoff by default (3 attempts, 500ms base delay)
+- Notification throttle window is configurable per call (default: 60 minutes)
+
 ### Added - February 2026
 - **Health Monitoring:** Enhanced health service with system metrics, CPU usage, and historical tracking
 - **Request Logging:** Advanced logging interceptor with metrics, security, and performance tracking
